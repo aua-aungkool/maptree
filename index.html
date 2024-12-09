@@ -1,433 +1,1398 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Weather Forecast Map</title>
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <meta charset="utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>TreeDB Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        html, body, h1, h2, h3, h4, h5 {
-            font-family: "Raleway", sans-serif;
-        }
         #map {
-            height: 400px;
-            width: 100%;
-            border: 1px solid darkslategrey;
+            height: 100vh; 
+            width: 100vw;
+        }
+        #search-box {
+            position: absolute;
+            top: 10px;
+            left: 80px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        #search-input {
+            width: 300px;
+            padding: 5px;
         }
     </style>
-    <style>
-        /* เปลี่ยนสี tab เมนูด้านข้าง */
-        .sidebar-blue {
-            background-color: #007BFF; /* สีน้ำเงิน */
-            color: rgb(242, 177, 65); /* สีข้อความ */
-        }
-        .sidebar-blue .w3-bar-item {
-            color: rgb(242, 177, 65); /* เปลี่ยนสีข้อความในเมนูให้เป็นสีขาว */
-        }
-        .sidebar-blue .w3-bar-item:hover {
-            background-color: #0056b3; /* สีเมื่อวางเมาส์ */
-        }
-    </style>
-    <style>
-        /* ทำคำว่า dashboard ให้หนาขึ้น  */
-        .dashboard-title {
-            font-size: 24px; /* ขนาดตัวอักษร */
-            font-weight: bold; /* ตัวอักษรหนา */
-        }
-    </style>
-    <style>
-        /* กำหนดแถบเมนู */
-        .top-bar {
-            background-color: #FFA07A; /* สีแซลมอน */
-            padding: 23px; /* ขนาด padding */
-            position: fixed; /* ทำให้แถบอยู่ที่ด้านบนเสมอ */
-            top: 0; /* ตำแหน่งที่ล็อค */
-            left: 0; /* ตำแหน่งด้านซ้าย */
-            width: 100%; /* ขนาดเต็มหน้าจอ */
-            
-            z-index: 3000; /* ระดับชั้นสูงสุด */
-        }
-    </style>
- <style>
-    /* เปลี่ยนสีเมื่อชี้เมนูเป็นสีแซลมอน */
-    .w3-bar-item:hover {
-        background-color: #FFA07A; /* สีแซลมอน */
-    }
-</style>
-
-<body class="w3-light-grey">
-    <!-- Top container -->
-    <div class="top-bar">
-        <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();">
-            <i class="fa fa-bars"></i> Menu
-        </button>
-        <span class="w3-bar-item w3-right"></span>
-    </div>
-
-    <!-- Sidebar/menu -->
-    <nav class="w3-sidebar w3-collapse w3-animate-left sidebar-blue" style="z-index:3;width:300px;" id="mySidebar"><br>
-        <div class="w3-container w3-row">
-            <div class="w3-col s4">
-                <img src="https://i.pinimg.com/736x/d9/d2/82/d9d282bfd1842ef06e706a12679e7e49.jpg" class="w3-circle w3-margin-right" style="width:65px">
-                <h5 class="dashboard-title">WeatherView</h5>
-            </div>   
-        </div>
-        <hr>
-        <div class="w3-container"></div>
-        <div class="w3-bar-block">
-            <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large" onclick="w3_close()" title="close menu">
-                <i class="fa fa-remove fa-fw"></i> Close Menu
-            </a>
-            <a href="#" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-cloud"></i> 7 day weather forecast</a>
-            <a href="#Map" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-map"></i> Map Weather Forecast</a>
-            <a href="#humidityChart" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-line-chart"></i> Line Chart</a>
-            <a href="#humidityDonut" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-pie-chart"></i> Donut chart</a>
-            <a href="table.html" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-table"></i> Weather forecast table</a>
-            <a href="settings.html" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-cog fa-fw"></i> Settings</a><br><br>
-        </div>
-    </nav>
-</body>
-
-
-<!-- Overlay effect when opening sidebar on small screens -->
-<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
-
-<!-- !PAGE CONTENT! -->
-<div class="w3-main" style="margin-left:300px;margin-top:43px;">
-    <!-- Header -->
-    <iframe src="https://www.tmd.go.th/weatherForecast7DaysWidget?province=ภูเก็ต" height="400" width="950" scrolling="no" frameborder="0"></iframe>
-
-    <div class="w3-panel">
-        <div class="w3-row-padding" style="margin:0 -16px">
-            <div class="w3-third" id="Map">
-                <h5>Map Weather Forecast</h5>
-                <img src="/w3images/region.jpg" style="width:100%" alt="">
-            </div>
-            <!-- Map -->
-            <div class="w3-container">
-                <div id='map'>[loading the map...]</div>
-            </div>
-        </div>
-    </div>
-    <hr>
-    <div class="w3-container">
-        <h5>General Stats</h5>
-        <p>เว็บแอปพลิเคชันแผนที่ออนไลน์สำหรับการพยากรณ์อากาศรายวันในประเทศไทยถูกออกแบบมาให้ใช้งานง่ายและมีประสิทธิภาพสูงในการติดตามสภาพอากาศตามสถานที่ต่างๆ แบบเรียลไทม์ ภายในเว็บประกอบด้วยแผนที่แบบโต้ตอบที่สามารถแสดงข้อมูลต่างๆ บนพื้นฐานของข้อมูลจากแหล่งที่เชื่อถือได้ เช่น OpenStreetMap และ Esri โดยมีโหมดแผนที่หลากหลายให้เลือกใช้ เช่น แผนที่สีเทาสำหรับดูพื้นที่ชัดเจนยิ่งขึ้น</p>
-    <p>แอปนี้ให้ผู้ใช้งานสามารถเลื่อนดูและซูมเข้า-ออกในแผนที่เพื่อดูรายละเอียดตามภูมิภาคต่างๆ ในประเทศไทย นอกจากนี้ยังมีตัวควบคุมเลเยอร์ที่ให้ผู้ใช้สลับไปมาระหว่างแผนที่และข้อมูลต่างๆ เช่น ข้อมูลสถานที่หรือพื้นที่พยากรณ์อากาศ แพลตฟอร์มนี้เหมาะสำหรับการติดตามสภาพอากาศในแต่ละวัน ไม่ว่าจะเป็นนักท่องเที่ยว ผู้เดินทาง หรือประชาชนทั่วไปที่ต้องการวางแผนกิจกรรมต่างๆ โดยสามารถใช้งานได้ผ่านอุปกรณ์ที่รองรับเบราว์เซอร์ทั่วไป</p>
-    </div>
-    </script>
-    <!--กราฟเส้น-->
-    <body>
-        <div class="w3-container">
-            <h3 style="text-align: center;">กราฟเเสดงค่าความชื้นรายชั่วโมง</h3>
-        </div>
-    </body>
-        <div id="humidityChart" style="width:100%;max-width:800px; margin: 0 auto;"></div>
-        <script>
-            const url1 = `https://api.weatherapi.com/v1/history.json?key=0d6ede3448ca49e88db165511242510&q=thailand&dt=2024-11-21`;
-    
-            // ดึงข้อมูลจาก API
-            fetch(url1)
-                .then(response => response.json())
-                .then(data => {
-                    // กำหนดตัวแปรข้อมูลช่วงเวลาและค่าความชื้น
-                    const timeValues = [];
-                    const humidityValues = [];
-                    //
-                    // ดึงข้อมูลช่วงเวลาต่าง ๆ ในแต่ละชั่วโมง
-                    data.forecast.forecastday[0].hour.forEach(hourData => {
-                        timeValues.push(hourData.time);
-                        humidityValues.push(hourData.humidity);
-                    });
-    
-                    // กำหนดข้อมูลสำหรับกราฟ
-                    const trace = {
-                        x: timeValues,
-                        y: humidityValues,
-                        type: 'scatter',          // ประเภทกราฟเส้น
-                        mode: 'lines+markers',    // แสดงเส้นและจุด
-                        marker: { color: 'blue' },
-                        name: 'Humidity (%)'
-                    };
-    
-                    const layout = {
-                        title: 'Humidity Levels Over Time',
-                        xaxis: { title: 'Time' },
-                        yaxis: { title: 'Humidity (%)' }
-                    };
-    
-                    // สร้างกราฟใน div ที่มี id เป็น "humidityChart"
-                    Plotly.newPlot('humidityChart', [trace], layout);
-                })
-                .catch(error => console.error('Error:', error));
-        </script>
-       <!--สรา้งโดนัท-->
-       <!--"กราฟแสดงการเปลี่ยนแปลงของค่าความชื้นสัมพัทธ์ในอากาศในแต่ละชั่วโมง ณ ประเทศไทย วันที่ 25 ตุลาคม 2567 ซึ่งช่วยให้เห็นแนวโน้มและช่วงเวลาที่ความชื้นในอากาศสูงหรือต่ำในระหว่างวัน"-->
-<!--"ข้อมูลนี้แสดงถึงความชื้นสัมพัทธ์ในอากาศรายชั่วโมง ซึ่งช่วยให้เข้าใจสภาพอากาศของวันที่ 25 ตุลาคม 2567 ในประเทศไทย และสามารถใช้ในการวางแผนกิจกรรมกลางแจ้งได้อย่างมีประสิทธิภาพ"-->
+</head>
 <body>
-    <div class="w3-container">
-        <h5>กราฟเส้นแสดงความชื้นรายชั่วโมง</h5>
-        <ul>
-            <li>กราฟนี้แสดงการเปลี่ยนแปลงของค่าความชื้นสัมพัทธ์ในอากาศในแต่ละชั่วโมง ณ ประเทศไทย วันที่ 25 ตุลาคม 2567 ซึ่งช่วยให้เห็นแนวโน้มและช่วงเวลาที่ความชื้นในอากาศสูงหรือต่ำในระหว่างวัน</li>
-            <li>ข้อมูลดังกล่าวสามารถช่วยในการวางแผนกิจกรรมต่าง ๆ โดยให้ข้อมูลเกี่ยวกับสภาพอากาศของประเทศไทยในวันที่ 25 ตุลาคม 2567 ได้อย่างชัดเจนยิ่งขึ้น</li>
-        </ul>
+    <div id="search-box">
+        <input type="text" id="search-input" placeholder="ค้นหาชื่อต้นไม้..." />
+        <button onclick="searchTree()">ค้นหา</button>
     </div>
-</body>
+    <div id="map"></div>
 
-        <div class="w3-container">
-            <h3 style="text-align: center;">กราฟเเสดงค่าความชื้นเฉลี่ย</h3></div>
-    </body>
-    <div id="humidityDonut" style="width:100%; max-width:800px; margin: 0 auto;"></div>
-    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
-        async function fetchHumidityData() {
-            const url = 'https://api.weatherapi.com/v1/history.json?key=0d6ede3448ca49e88db165511242510&q=Thailand&dt=2024-11-21';
-    
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-    
-                const avgHumidity = data.forecast.forecastday[0].day.avghumidity;
-                const otherPercentage = 100 - avgHumidity;
-    
-                createDonutChart(avgHumidity, otherPercentage);
-            } catch (error) {
-                console.error('Error fetching humidity data:', error);
-            }
-        }
-    
-        function createDonutChart(avgHumidity, otherPercentage) {
-            const data = [{
-                values: [avgHumidity, otherPercentage],
-                labels: ['Average Humidity (%)', 'Other'],
-                type: 'pie',
-                hole: .4,
-                marker: {
-                    colors: ['#1f77b4', '#f4551b'] 
-                }
-            }];
-    
-            const layout = {
-                title: 'Average Humidity (%) on 2024-10-28',
-                annotations: [{
-                    text: 'Humidity',
-                    showarrow: false,
-                    font: {
-                        size: 20
-                    }
-                }]
-            };
-    
-            Plotly.newPlot('humidityDonut', data, layout);
-        }
-    
-        // เรียกใช้งานฟังก์ชัน fetchHumidityData
-        fetchHumidityData();
-    </script>    
-    <body>
-        <div class="w3-container">
-            <h5>กราฟโดนัทแสดงค่าความชื้นเฉลี่ยในประเทศไทย วันที่ 28 ตุลาคม 2567</h5>
-            <ul>
-                <li>กราฟโดนัทนี้แสดงค่าความชื้นสัมพัทธ์เฉลี่ยในอากาศประจำวันที่ 28 ตุลาคม 2567 ในประเทศไทย โดยมีการแบ่งพื้นที่แสดงเปอร์เซ็นต์ของค่าความชื้นและส่วนอื่น ๆ เพื่อแสดงให้เห็นถึงสภาพอากาศโดยรวมในวันนั้น ข้อมูลนี้สามารถช่วยในการวางแผนกิจกรรมต่าง ๆ และการเตรียมความพร้อมในสภาพอากาศที่ชื้นมากขึ้นหรือน้อย</li>
-                <li>ข้อมูลดังกล่าวสามารถช่วยในการวางแผนกิจกรรมต่าง ๆ โดยให้ข้อมูลเกี่ยวกับสภาพอากาศของประเทศไทยในวันที่ 25 ตุลาคม 2567 ได้อย่างชัดเจนยิ่งขึ้น</li>
-            </ul>
-        </div>
-    </body>
-<hr>
-<br>
-<div class="w3-container" style="background-color: #FFA07A; padding: 32px;">
-    <!-- เนื้อหาของคุณที่นี่ -->
-</div>
-
-</div>
-<!-- End page content -->
-<!--เรียกใช้ฟังก์ชันเพื่อดึงข้อมูลและสร้างกราฟ-->
-
-<script>
-    const apiKey = '5063cf3dfb2dcbb7ba6d6f005cabbbb2';
-    
-    // Cities data with coordinates
-    const cities = [
-        { name: 'Bangkok', lat: 13.7563, lon: 100.5018 },
-        { name: 'Chiang Mai', lat: 18.7883, lon: 98.9853 },
-        { name: 'Phuket', lat: 7.8804, lon: 98.3923 },
-        { name: 'Pattaya', lat: 12.9236, lon: 100.8825 },
-        { name: 'Khon Kaen', lat: 16.4419, lon: 102.8350 },
-        { name: 'Hat Yai', lat: 7.0083, lon: 100.4743 }
-    ];
-
-    let map;
-
-    window.onload = function() {
-        initializeMap();
-        cities.forEach(city => fetchWeather(city));
-        fetchWeatherData(); // Call to fetch weather data for chart
-    };
-
-    function initializeMap() {
-        map = L.map('map', {
-            center: [7.8804, 98.3923], // Centering to Phuket
-            zoom: 11,
-            layers: [gray_map] // Initialize with gray map
-        });
-    }
-
-    async function fetchWeather(city) {
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&appid=${apiKey}&units=metric`;
-        
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const data = await response.json();
-            displayWeatherOnMap(city, data);
-        } catch (error) {
-            console.error("Request failed: ", error);
-        }
-    }
-
-    function displayWeatherOnMap(city, data) {
-        const weatherInfo = `
-            <h2>Weather in ${city.name}</h2>
-            <p><strong>Temperature:</strong> ${data.main.temp}°C</p>
-            <p><strong>Weather:</strong> ${data.weather[0].description}</p>
-            <p><strong>Humidity:</strong> ${data.main.humidity}%</p>
-            <p><strong>Wind Speed:</strong> ${data.wind.speed} m/s</p>
-        `;
-
-        const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-        const weatherIcon = L.icon({
-            iconUrl: iconUrl,
-            iconSize: [50, 50],
-            iconAnchor: [25, 50],
-            popupAnchor: [0, -50]
+        // แผนที่ฐาน (Base Maps)
+        const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         });
 
-        const marker = L.marker([city.lat, city.lon], { icon: weatherIcon }).addTo(map);
-        marker.bindPopup(weatherInfo);
-    }
-</script>
+        const grayMap = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: '© <a href="https://www.esri.com">Esri</a> contributors'
+        });
 
-<!--สรา้งกราฟโดนัท-->
-<div id="myPlot" style="width:100%;max-width:700px"></div>
-<script>
-  const places = L.layerGroup(); // สร้าง layer group สำหรับเลเยอร์ที่คุณต้องการแสดง
-  
-  </script>
-  <script>
-    
-    // สร้างแผนที่เมื่อโหลดหน้าเสร็จ
-     window.onload = function() {
-    //ส่วนที่ขอพิกัดผู็ใช้
-        function showUserLocation(map) {
-        // Check if Geolocation API is supported by the browser
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function (position) {
-                // Get the latitude and longitude from the user's position
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
+        const googleMap = L.tileLayer('https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}', {
+            maxZoom: 19,
+            attribution: '© <a href="https://www.google.com/maps">Google Maps</a>'
+        });
 
-                // Create a marker for the user's position
-                const userMarker = L.marker([lat, lon]).addTo(map);
-
-                // Center the map to the user's position
-                map.setView([lat, lon], 12);
-
-                // Bind a popup to show the user's coordinates
-                userMarker.bindPopup(`<b>You are here!</b><br>Latitude: ${lat}<br>Longitude: ${lon}`).openPopup();
-            }, function (error) {
-                console.error("Error getting location: ", error.message);
-                alert("Unable to retrieve your location.");
-            });
-        } else {
-            alert("Geolocation is not supported by this browser.");
-        }
-    }
-
-     // Base Set
-  const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  });
-  const gray_map = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 19,
-      attribution: '© <a href="https://www.esri.com">Esri</a> contributors'
-  });
-        // Initialize the map
+        // สร้างแผนที่
         const map = L.map('map', {
-            center: [13.7563, 100.5018],
+            center: [13.7563, 100.5018], // Bangkok, Thailand
             zoom: 6,
-            layers: [gray_map] // Default layer
+            layers: [osm] // Default layer
         });
 
-        // เรียกใช้ฟังก์ชัน showUserLocation
-    showUserLocation(map);
-    
-        // Base map options for switching layers
+        // ตัวเลือกแผนที่ฐาน (Base Maps)
         const baseMaps = {
-            'แผนที่ฐาน OSM': osm,
-            'แผนที่สีเทา': gray_map
+            'แผนที่ OSM': osm,
+            'แผนที่สีเทา': grayMap,
+            'Google Maps': googleMap
         };
-    
-        // Add layer control to map
+
+        // เพิ่มตัวควบคุมสำหรับเปลี่ยน Base Map
         L.control.layers(baseMaps).addTo(map);
-    
-        // Fetch weather data and add markers for each city
-        async function fetchWeather(city) {
-            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lon}&appid=${apiKey}&units=metric`;
-            
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-    
-                if (response.ok) {
-                    displayWeatherOnMap(city, data);
-                } else {
-                    console.error("Error fetching data: ", data.message);
-                }
-            } catch (error) {
-                console.error("Request failed: ", error);
-            }
-        }
-    
-        // Display weather info on the map for each city
-        function displayWeatherOnMap(city, data) {
-            const weatherInfo = `
-                <h2>Weather in ${city.name}</h2>
-                <p><strong>Temperature:</strong> ${data.main.temp}°C</p>
-                <p><strong>Weather:</strong> ${data.weather[0].description}</p>
-                <p><strong>Humidity:</strong> ${data.main.humidity}%</p>
-                <p><strong>Wind Speed:</strong> ${data.wind.speed} m/s</p>
-            `;
-    
-            // Use OpenWeatherMap icon
-            const iconUrl = `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-    
-            // Create a custom icon
-            const weatherIcon = L.icon({
-                iconUrl: iconUrl,
-                iconSize: [50, 50],
-                iconAnchor: [25, 50],
-                popupAnchor: [0, -50]
-            });
-    
-            // Add a marker with the appropriate icon for the city
-            const marker = L.marker([city.lat, city.lon], { icon: weatherIcon }).addTo(map);
-    
-            // Bind the weather info to a popup on the marker
-            marker.bindPopup(weatherInfo);
-        }
-    
-        // Fetch weather data for all cities
-        cities.forEach(city => fetchWeather(city));
-    };
-    </script>
-    
-  
+
+        // ข้อมูลตัวอย่าง Marker
+        const treeData = [
+  {
+    "รหัสต้นไม้": "01-001-001",
+    "ชื่อไทย": "ชมพูพันธุ์ทิพย์",
+    "Latitude": 7.903324,
+    "Longitude": 98.351244,
+    "ความสูง (เมตร)": 3.4,
+    "เส้นรอบวง (เมตร)": 0.3,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "01-001-002",
+    "ชื่อไทย": "ชมพูพันธุ์ทิพย์",
+    "Latitude": 7.903397,
+    "Longitude": 98.350655,
+    "ความสูง (เมตร)": 5.2,
+    "เส้นรอบวง (เมตร)": 0.43,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "01-021-001",
+    "ชื่อไทย": "ตีนเป็ด",
+    "Latitude": 7.903429,
+    "Longitude": 98.351475,
+    "ความสูง (เมตร)": 17.22,
+    "เส้นรอบวง (เมตร)": 1.78,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "01-022-001",
+    "ชื่อไทย": "ไทร",
+    "Latitude": 7.90391,
+    "Longitude": 98.351489,
+    "ความสูง (เมตร)": 28.79,
+    "เส้นรอบวง (เมตร)": 50,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "01-028-001",
+    "ชื่อไทย": "หูกวาง",
+    "Latitude": 7.904441,
+    "Longitude": 98.351243,
+    "ความสูง (เมตร)": 18.52,
+    "เส้นรอบวง (เมตร)": 3.45,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "02-014-001",
+    "ชื่อไทย": "ประดู่ป่า",
+    "Latitude": 7.898826,
+    "Longitude": 98.359192,
+    "ความสูง (เมตร)": 8,
+    "เส้นรอบวง (เมตร)": 0.6,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 210.5,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 153.09
+  },
+  {
+    "รหัสต้นไม้": "02-017-001",
+    "ชื่อไทย": "ราชพฤกษ์",
+    "Latitude": 7.896600395,
+    "Longitude": 98.35970898,
+    "ความสูง (เมตร)": 4.18,
+    "เส้นรอบวง (เมตร)": 0.34,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 36.78,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 26.75
+  },
+  {
+    "รหัสต้นไม้": "02-037-001",
+    "ชื่อไทย": "ประดู่บ้าน",
+    "Latitude": 7.898718354,
+    "Longitude": 98.35914094,
+    "ความสูง (เมตร)": 8,
+    "เส้นรอบวง (เมตร)": 1.42,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1168.15,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 849.56
+  },
+  {
+    "รหัสต้นไม้": "02-039-001",
+    "ชื่อไทย": "ส้านใหญ่",
+    "Latitude": 7.898869116,
+    "Longitude": 98.35885426,
+    "ความสูง (เมตร)": 9.5,
+    "เส้นรอบวง (เมตร)": 0.92,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 579.34,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 421.34
+  },
+  {
+    "รหัสต้นไม้": "03-002-001",
+    "ชื่อไทย": "ยอป่า",
+    "Latitude": 7.887972147,
+    "Longitude": 98.34124543,
+    "ความสูง (เมตร)": 13.3,
+    "เส้นรอบวง (เมตร)": 0.22,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 45.79,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 33.3
+  },
+  {
+    "รหัสต้นไม้": "03-002-002",
+    "ชื่อไทย": "ยอป่า",
+    "Latitude": 7.883767,
+    "Longitude": 98.335533,
+    "ความสูง (เมตร)": 8.9,
+    "เส้นรอบวง (เมตร)": 1.3,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1083.11,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 787.72
+  },
+  {
+    "รหัสต้นไม้": "03-002-003",
+    "ชื่อไทย": "ยอป่า",
+    "Latitude": 7.879975,
+    "Longitude": 98.332415,
+    "ความสูง (เมตร)": 6.9,
+    "เส้นรอบวง (เมตร)": 0.85,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 366.8,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 266.77
+  },
+  {
+    "รหัสต้นไม้": "03-002-004",
+    "ชื่อไทย": "ยอป่า",
+    "Latitude": 7.881541374,
+    "Longitude": 98.33025295,
+    "ความสูง (เมตร)": 12.6,
+    "เส้นรอบวง (เมตร)": 1.25,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1386.59,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 1008.43
+  },
+  {
+    "รหัสต้นไม้": "03-002-005",
+    "ชื่อไทย": "ยอป่า",
+    "Latitude": 7.891083,
+    "Longitude": 98.334505,
+    "ความสูง (เมตร)": 5.8,
+    "เส้นรอบวง (เมตร)": 0.92,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 364.89,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 265.38
+  },
+  {
+    "รหัสต้นไม้": "03-002-006",
+    "ชื่อไทย": "ยอป่า",
+    "Latitude": 7.891593205,
+    "Longitude": 98.33505556,
+    "ความสูง (เมตร)": 8.9,
+    "เส้นรอบวง (เมตร)": 4,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 10079.09,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 7330.25
+  },
+  {
+    "รหัสต้นไม้": "03-003-001",
+    "ชื่อไทย": "มะมุด",
+    "Latitude": 7.889192,
+    "Longitude": 98.331282,
+    "ความสูง (เมตร)": 10,
+    "เส้นรอบวง (เมตร)": 2.32,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 5417.49,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 3939.99
+  },
+  {
+    "รหัสต้นไม้": "03-004-001",
+    "ชื่อไทย": "เนียง",
+    "Latitude": 7.882974228,
+    "Longitude": 98.33087077,
+    "ความสูง (เมตร)": 11.7,
+    "เส้นรอบวง (เมตร)": 1.46,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 2482.44,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 1805.41
+  },
+  {
+    "รหัสต้นไม้": "03-004-002",
+    "ชื่อไทย": "เนียง",
+    "Latitude": 7.887703614,
+    "Longitude": 98.33135626,
+    "ความสูง (เมตร)": 12.2,
+    "เส้นรอบวง (เมตร)": 1.39,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 2337.28,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 1699.84
+  },
+  {
+    "รหัสต้นไม้": "03-005-001",
+    "ชื่อไทย": "พลับพลา",
+    "Latitude": 7.881569303,
+    "Longitude": 98.33026275,
+    "ความสูง (เมตร)": 11.5,
+    "เส้นรอบวง (เมตร)": 0.87,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 619.98,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 450.9
+  },
+  {
+    "รหัสต้นไม้": "03-005-002",
+    "ชื่อไทย": "พลับพลา",
+    "Latitude": 7.88296,
+    "Longitude": 98.33086,
+    "ความสูง (เมตร)": 5.9,
+    "เส้นรอบวง (เมตร)": 0.49,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 105.55,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 76.77
+  },
+  {
+    "รหัสต้นไม้": "03-005-003",
+    "ชื่อไทย": "พลับพลา",
+    "Latitude": 7.885395907,
+    "Longitude": 98.33163133,
+    "ความสูง (เมตร)": 12,
+    "เส้นรอบวง (เมตร)": 0.69,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 406.86,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 295.9
+  },
+  {
+    "รหัสต้นไม้": "03-006-001",
+    "ชื่อไทย": "ยางพารา",
+    "Latitude": 7.887286,
+    "Longitude": 98.340563,
+    "ความสูง (เมตร)": 21.5,
+    "เส้นรอบวง (เมตร)": 1.7,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 4203.08,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 3056.79
+  },
+  {
+    "รหัสต้นไม้": "03-006-002",
+    "ชื่อไทย": "ยางพารา",
+    "Latitude": 7.880372,
+    "Longitude": 98.329523,
+    "ความสูง (เมตร)": 18.5,
+    "เส้นรอบวง (เมตร)": 2.5,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 7855.22,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 5712.89
+  },
+  {
+    "รหัสต้นไม้": "03-007-001",
+    "ชื่อไทย": "มะเดื่อ",
+    "Latitude": 7.887979144,
+    "Longitude": 98.34123458,
+    "ความสูง (เมตร)": 21.26,
+    "เส้นรอบวง (เมตร)": 1.6,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-007-002",
+    "ชื่อไทย": "มะเดื่อ",
+    "Latitude": 7.877614264,
+    "Longitude": 98.32908997,
+    "ความสูง (เมตร)": 22,
+    "เส้นรอบวง (เมตร)": 2.01,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-007-003",
+    "ชื่อไทย": "มะเดื่อ",
+    "Latitude": 7.885786,
+    "Longitude": 98.33134,
+    "ความสูง (เมตร)": 11.3,
+    "เส้นรอบวง (เมตร)": 1.46,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-008-001",
+    "ชื่อไทย": "กะออก",
+    "Latitude": 7.886592,
+    "Longitude": 98.340099,
+    "ความสูง (เมตร)": 7,
+    "เส้นรอบวง (เมตร)": 0.9,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 599.12,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 435.72
+  },
+  {
+    "รหัสต้นไม้": "03-008-002",
+    "ชื่อไทย": "กะออก",
+    "Latitude": 7.877351,
+    "Longitude": 98.330632,
+    "ความสูง (เมตร)": 13.6,
+    "เส้นรอบวง (เมตร)": 0.96,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1233.97,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 897.44
+  },
+  {
+    "รหัสต้นไม้": "03-009-001",
+    "ชื่อไทย": "สะตอ",
+    "Latitude": 7.883902,
+    "Longitude": 98.33083,
+    "ความสูง (เมตร)": 25.7,
+    "เส้นรอบวง (เมตร)": 1.5,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 5302.38,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 3856.28
+  },
+  {
+    "รหัสต้นไม้": "03-010-001",
+    "ชื่อไทย": "มะฮอกกานีใบใหญ่",
+    "Latitude": 7.886155,
+    "Longitude": 98.340237,
+    "ความสูง (เมตร)": 22.3,
+    "เส้นรอบวง (เมตร)": 0.81,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-010-002",
+    "ชื่อไทย": "มะฮอกกานีใบใหญ่",
+    "Latitude": 7.882799,
+    "Longitude": 98.334527,
+    "ความสูง (เมตร)": 22.4,
+    "เส้นรอบวง (เมตร)": 1.27,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-010-003",
+    "ชื่อไทย": "มะฮอกกานีใบใหญ่",
+    "Latitude": 7.88152,
+    "Longitude": 98.333513,
+    "ความสูง (เมตร)": 28.5,
+    "เส้นรอบวง (เมตร)": 2.1,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-011-001",
+    "ชื่อไทย": "กัลปพฤกษ์",
+    "Latitude": 7.882665,
+    "Longitude": 98.334029,
+    "ความสูง (เมตร)": 7.9,
+    "เส้นรอบวง (เมตร)": 0.87,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 436.15,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 317.2
+  },
+  {
+    "รหัสต้นไม้": "03-012-001",
+    "ชื่อไทย": "สะเดาเทียม",
+    "Latitude": 7.883351,
+    "Longitude": 98.334664,
+    "ความสูง (เมตร)": 23.6,
+    "เส้นรอบวง (เมตร)": 3.62,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 20632.01,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 15005.1
+  },
+  {
+    "รหัสต้นไม้": "03-012-002",
+    "ชื่อไทย": "สะเดาเทียม",
+    "Latitude": 7.880325,
+    "Longitude": 98.332809,
+    "ความสูง (เมตร)": 20.5,
+    "เส้นรอบวง (เมตร)": 1.8,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 4502.84,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 3274.79
+  },
+  {
+    "รหัสต้นไม้": "03-012-003",
+    "ชื่อไทย": "สะเดาเทียม",
+    "Latitude": 7.877465,
+    "Longitude": 98.331036,
+    "ความสูง (เมตร)": 26.4,
+    "เส้นรอบวง (เมตร)": 1.68,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 4974.83,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 3618.06
+  },
+  {
+    "รหัสต้นไม้": "03-013-001",
+    "ชื่อไทย": "มะกล่ำต้น",
+    "Latitude": 7.884021,
+    "Longitude": 98.335215,
+    "ความสูง (เมตร)": 21.5,
+    "เส้นรอบวง (เมตร)": 2.43,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 8546.59,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 6215.7
+  },
+  {
+    "รหัสต้นไม้": "03-013-002",
+    "ชื่อไทย": "มะกล่ำต้น",
+    "Latitude": 7.878151,
+    "Longitude": 98.331768,
+    "ความสูง (เมตร)": 20.4,
+    "เส้นรอบวง (เมตร)": 1.42,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 2800.39,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 2036.64
+  },
+  {
+    "รหัสต้นไม้": "03-014-001",
+    "ชื่อไทย": "ประดู่ป่า",
+    "Latitude": 7.883765,
+    "Longitude": 98.338424,
+    "ความสูง (เมตร)": 10.9,
+    "เส้นรอบวง (เมตร)": 1.77,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 2413.64,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 1755.38
+  },
+  {
+    "รหัสต้นไม้": "03-014-002",
+    "ชื่อไทย": "ประดู่ป่า",
+    "Latitude": 7.878274,
+    "Longitude": 98.33171,
+    "ความสูง (เมตร)": 14.1,
+    "เส้นรอบวง (เมตร)": 1.35,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1794.11,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 1304.81
+  },
+  {
+    "รหัสต้นไม้": "03-014-003",
+    "ชื่อไทย": "ประดู่ป่า",
+    "Latitude": 7.891824579,
+    "Longitude": 98.33513393,
+    "ความสูง (เมตร)": 13.5,
+    "เส้นรอบวง (เมตร)": 1.98,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 3681.38,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 2677.37
+  },
+  {
+    "รหัสต้นไม้": "03-015-001",
+    "ชื่อไทย": "ตาลโตนด",
+    "Latitude": 7.892329,
+    "Longitude": 98.335772,
+    "ความสูง (เมตร)": 21,
+    "เส้นรอบวง (เมตร)": 1.31,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-016-001",
+    "ชื่อไทย": "ตะแบกนา",
+    "Latitude": 7.887406893,
+    "Longitude": 98.34149925,
+    "ความสูง (เมตร)": 21.2,
+    "เส้นรอบวง (เมตร)": 3.48,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 17243.63,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 12540.82
+  },
+  {
+    "รหัสต้นไม้": "03-016-002",
+    "ชื่อไทย": "ตะแบกนา",
+    "Latitude": 7.8867,
+    "Longitude": 98.34013,
+    "ความสูง (เมตร)": 20,
+    "เส้นรอบวง (เมตร)": 2.5,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 8450.55,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 6145.86
+  },
+  {
+    "รหัสต้นไม้": "03-016-003",
+    "ชื่อไทย": "ตะแบกนา",
+    "Latitude": 7.882838,
+    "Longitude": 98.334565,
+    "ความสูง (เมตร)": 13.9,
+    "เส้นรอบวง (เมตร)": 0.9,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 791.92,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 575.94
+  },
+  {
+    "รหัสต้นไม้": "03-016-004",
+    "ชื่อไทย": "ตะแบกนา",
+    "Latitude": 7.882495,
+    "Longitude": 98.333902,
+    "ความสูง (เมตร)": 10.4,
+    "เส้นรอบวง (เมตร)": 0.85,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 538.77,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 391.84
+  },
+  {
+    "รหัสต้นไม้": "03-016-005",
+    "ชื่อไทย": "ตะแบกนา",
+    "Latitude": 7.885657549,
+    "Longitude": 98.33151445,
+    "ความสูง (เมตร)": 12.7,
+    "เส้นรอบวง (เมตร)": 0.97,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 844.5,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 614.18
+  },
+  {
+    "รหัสต้นไม้": "03-017-001",
+    "ชื่อไทย": "ราชพฤกษ์",
+    "Latitude": 7.884199,
+    "Longitude": 98.336525,
+    "ความสูง (เมตร)": 12.6,
+    "เส้นรอบวง (เมตร)": 1.21,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1299.97,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 945.43
+  },
+  {
+    "รหัสต้นไม้": "03-017-002",
+    "ชื่อไทย": "ราชพฤกษ์",
+    "Latitude": 7.8854,
+    "Longitude": 98.331631,
+    "ความสูง (เมตร)": 17.3,
+    "เส้นรอบวง (เมตร)": 0.83,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 827.49,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 601.81
+  },
+  {
+    "รหัสต้นไม้": "03-018-001",
+    "ชื่อไทย": "จามจุรี",
+    "Latitude": 7.89236,
+    "Longitude": 98.335345,
+    "ความสูง (เมตร)": 22.47,
+    "เส้นรอบวง (เมตร)": 4.48,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-019-001",
+    "ชื่อไทย": "กระถินณรงค์",
+    "Latitude": 7.881959,
+    "Longitude": 98.330409,
+    "ความสูง (เมตร)": 25.4,
+    "เส้นรอบวง (เมตร)": 2.29,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-019-002",
+    "ชื่อไทย": "กระถินณรงค์",
+    "Latitude": 7.889872301,
+    "Longitude": 98.33243769,
+    "ความสูง (เมตร)": 16.6,
+    "เส้นรอบวง (เมตร)": 0.53,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-020-001",
+    "ชื่อไทย": "กระถินเทพา",
+    "Latitude": 7.88989765,
+    "Longitude": 98.33244655,
+    "ความสูง (เมตร)": 23,
+    "เส้นรอบวง (เมตร)": 0.82,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-021-001",
+    "ชื่อไทย": "ตีนเป็ด",
+    "Latitude": 7.887823,
+    "Longitude": 98.341548,
+    "ความสูง (เมตร)": 20.6,
+    "เส้นรอบวง (เมตร)": 2.31,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-021-002",
+    "ชื่อไทย": "ตีนเป็ด",
+    "Latitude": 7.882751,
+    "Longitude": 98.337292,
+    "ความสูง (เมตร)": 28.1,
+    "เส้นรอบวง (เมตร)": 1.86,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-021-003",
+    "ชื่อไทย": "ตีนเป็ด",
+    "Latitude": 7.882801,
+    "Longitude": 98.334499,
+    "ความสูง (เมตร)": 20.8,
+    "เส้นรอบวง (เมตร)": 3.06,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-021-004",
+    "ชื่อไทย": "ตีนเป็ด",
+    "Latitude": 7.878276,
+    "Longitude": 98.331709,
+    "ความสูง (เมตร)": 15.4,
+    "เส้นรอบวง (เมตร)": 2.1,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-022-001",
+    "ชื่อไทย": "ไทร",
+    "Latitude": 7.883193,
+    "Longitude": 98.334579,
+    "ความสูง (เมตร)": 13.1,
+    "เส้นรอบวง (เมตร)": 1.64,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-022-002",
+    "ชื่อไทย": "ไทร",
+    "Latitude": 7.880006,
+    "Longitude": 98.332455,
+    "ความสูง (เมตร)": 13.9,
+    "เส้นรอบวง (เมตร)": 1.7,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-023-001",
+    "ชื่อไทย": "ปอหู",
+    "Latitude": 7.886392,
+    "Longitude": 98.340055,
+    "ความสูง (เมตร)": 8.9,
+    "เส้นรอบวง (เมตร)": 0.95,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 580.92,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 422.49
+  },
+  {
+    "รหัสต้นไม้": "03-023-002",
+    "ชื่อไทย": "ปอหู",
+    "Latitude": 7.882522,
+    "Longitude": 98.337266,
+    "ความสูง (เมตร)": 24.2,
+    "เส้นรอบวง (เมตร)": 0.95,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1480.61,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 1076.81
+  },
+  {
+    "รหัสต้นไม้": "03-023-003",
+    "ชื่อไทย": "ปอหู",
+    "Latitude": 7.877843,
+    "Longitude": 98.331669,
+    "ความสูง (เมตร)": 21.7,
+    "เส้นรอบวง (เมตร)": 1.2,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 4076.03,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 2964.38
+  },
+  {
+    "รหัสต้นไม้": "03-023-004",
+    "ชื่อไทย": "ปอหู",
+    "Latitude": 7.880547,
+    "Longitude": 98.329603,
+    "ความสูง (เมตร)": 14.7,
+    "เส้นรอบวง (เมตร)": 0.95,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 929.05,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 675.67
+  },
+  {
+    "รหัสต้นไม้": "03-024-001",
+    "ชื่อไทย": "มะม่วงหิมพานต์",
+    "Latitude": 7.881251,
+    "Longitude": 98.333904,
+    "ความสูง (เมตร)": 1.7,
+    "เส้นรอบวง (เมตร)": 0.24,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-025-001",
+    "ชื่อไทย": "หางนกยูงฝรั่ง",
+    "Latitude": 7.887652656,
+    "Longitude": 98.34176987,
+    "ความสูง (เมตร)": 20,
+    "เส้นรอบวง (เมตร)": 0.28,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-025-002",
+    "ชื่อไทย": "หางนกยูงฝรั่ง",
+    "Latitude": 7.883708,
+    "Longitude": 98.33854,
+    "ความสูง (เมตร)": 17,
+    "เส้นรอบวง (เมตร)": 1.38,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-025-003",
+    "ชื่อไทย": "หางนกยูงฝรั่ง",
+    "Latitude": 7.882150331,
+    "Longitude": 98.33767068,
+    "ความสูง (เมตร)": 14.2,
+    "เส้นรอบวง (เมตร)": 0.7,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-025-004",
+    "ชื่อไทย": "หางนกยูงฝรั่ง",
+    "Latitude": 7.884,
+    "Longitude": 98.335113,
+    "ความสูง (เมตร)": 9.4,
+    "เส้นรอบวง (เมตร)": 0.5,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-025-005",
+    "ชื่อไทย": "หางนกยูงฝรั่ง",
+    "Latitude": 7.883142,
+    "Longitude": 98.33468,
+    "ความสูง (เมตร)": 8.9,
+    "เส้นรอบวง (เมตร)": 0.79,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-025-006",
+    "ชื่อไทย": "หางนกยูงฝรั่ง",
+    "Latitude": 7.877894,
+    "Longitude": 98.331573,
+    "ความสูง (เมตร)": 12.2,
+    "เส้นรอบวง (เมตร)": 1.01,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-025-007",
+    "ชื่อไทย": "หางนกยูงฝรั่ง",
+    "Latitude": 7.891247483,
+    "Longitude": 98.33333936,
+    "ความสูง (เมตร)": 11.6,
+    "เส้นรอบวง (เมตร)": 1.25,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-026-001",
+    "ชื่อไทย": "แคนา",
+    "Latitude": 7.888804,
+    "Longitude": 98.33966,
+    "ความสูง (เมตร)": 6.4,
+    "เส้นรอบวง (เมตร)": 0.5,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-026-002",
+    "ชื่อไทย": "แคนา",
+    "Latitude": 7.888898,
+    "Longitude": 98.339443,
+    "ความสูง (เมตร)": 7.6,
+    "เส้นรอบวง (เมตร)": 0.63,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-026-003",
+    "ชื่อไทย": "แคนา",
+    "Latitude": 7.888352,
+    "Longitude": 98.33929,
+    "ความสูง (เมตร)": 7.2,
+    "เส้นรอบวง (เมตร)": 0.69,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-026-004",
+    "ชื่อไทย": "แคนา",
+    "Latitude": 7.888389,
+    "Longitude": 98.339496,
+    "ความสูง (เมตร)": 6,
+    "เส้นรอบวง (เมตร)": 0.74,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-026-005",
+    "ชื่อไทย": "แคนา",
+    "Latitude": 7.888864,
+    "Longitude": 98.339932,
+    "ความสูง (เมตร)": 6.6,
+    "เส้นรอบวง (เมตร)": 0.66,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-026-006",
+    "ชื่อไทย": "แคนา",
+    "Latitude": 7.889026,
+    "Longitude": 98.339998,
+    "ความสูง (เมตร)": 11,
+    "เส้นรอบวง (เมตร)": 0.76,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-027-001",
+    "ชื่อไทย": "แซะ",
+    "Latitude": 7.885099,
+    "Longitude": 98.337281,
+    "ความสูง (เมตร)": 9.6,
+    "เส้นรอบวง (เมตร)": 1.03,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 732.28,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 532.57
+  },
+  {
+    "รหัสต้นไม้": "03-028-001",
+    "ชื่อไทย": "หูกวาง",
+    "Latitude": 7.891234,
+    "Longitude": 98.333268,
+    "ความสูง (เมตร)": 12.3,
+    "เส้นรอบวง (เมตร)": 1.1,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "03-039-001",
+    "ชื่อไทย": "ส้านใหญ่",
+    "Latitude": 7.887364,
+    "Longitude": 98.340649,
+    "ความสูง (เมตร)": 16.8,
+    "เส้นรอบวง (เมตร)": 0.96,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1074.71,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 781.61
+  },
+  {
+    "รหัสต้นไม้": "03-039-002",
+    "ชื่อไทย": "ส้านใหญ่",
+    "Latitude": 7.877156763,
+    "Longitude": 98.33053171,
+    "ความสูง (เมตร)": 7.5,
+    "เส้นรอบวง (เมตร)": 0.23,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 29.19,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 21.23
+  },
+  {
+    "รหัสต้นไม้": "03-040-001",
+    "ชื่อไทย": "ติ้วขาว",
+    "Latitude": 7.879571063,
+    "Longitude": 98.32907775,
+    "ความสูง (เมตร)": 8.6,
+    "เส้นรอบวง (เมตร)": 1.2,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1810.39,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 1316.65
+  },
+  {
+    "รหัสต้นไม้": "03-041-001",
+    "ชื่อไทย": "กะทังใบใหญ่",
+    "Latitude": 7.886444323,
+    "Longitude": 98.33135822,
+    "ความสูง (เมตร)": 12.7,
+    "เส้นรอบวง (เมตร)": 0.92,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1066.34,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 775.52
+  },
+  {
+    "รหัสต้นไม้": "03-042-001",
+    "ชื่อไทย": "ทุ้งฟ้า",
+    "Latitude": 7.883095,
+    "Longitude": 98.338559,
+    "ความสูง (เมตร)": 25.3,
+    "เส้นรอบวง (เมตร)": 0.9,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1894.4,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 1377.75
+  },
+  {
+    "รหัสต้นไม้": "03-042-002",
+    "ชื่อไทย": "ทุ้งฟ้า",
+    "Latitude": 7.878176,
+    "Longitude": 98.331759,
+    "ความสูง (เมตร)": 14.8,
+    "เส้นรอบวง (เมตร)": 0.86,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1069.45,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 777.78
+  },
+  {
+    "รหัสต้นไม้": "03-042-003",
+    "ชื่อไทย": "ทุ้งฟ้า",
+    "Latitude": 7.877886,
+    "Longitude": 98.331582,
+    "ความสูง (เมตร)": 21,
+    "เส้นรอบวง (เมตร)": 1.04,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 2135.97,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 1553.43
+  },
+  {
+    "รหัสต้นไม้": "03-042-004",
+    "ชื่อไทย": "ทุ้งฟ้า",
+    "Latitude": 7.877456,
+    "Longitude": 98.3308,
+    "ความสูง (เมตร)": 16.8,
+    "เส้นรอบวง (เมตร)": 0.72,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 841.3,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 611.86
+  },
+  {
+    "รหัสต้นไม้": "03-042-005",
+    "ชื่อไทย": "ทุ้งฟ้า",
+    "Latitude": 7.882007,
+    "Longitude": 98.330447,
+    "ความสูง (เมตร)": 30,
+    "เส้นรอบวง (เมตร)": 1.12,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 3409.86,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 2479.9
+  },
+  {
+    "รหัสต้นไม้": "03-043-001",
+    "ชื่อไทย": "มะปริง",
+    "Latitude": 7.892569735,
+    "Longitude": 98.33551052,
+    "ความสูง (เมตร)": 13,
+    "เส้นรอบวง (เมตร)": 2.35,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 7026.53,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 5110.21
+  },
+  {
+    "รหัสต้นไม้": "03-044-001",
+    "ชื่อไทย": "กะอาม",
+    "Latitude": 7.887827,
+    "Longitude": 98.341447,
+    "ความสูง (เมตร)": 22.8,
+    "เส้นรอบวง (เมตร)": 2.37,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 8592.03,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 6248.75
+  },
+  {
+    "รหัสต้นไม้": "03-044-002",
+    "ชื่อไทย": "กะอาม",
+    "Latitude": 7.883801,
+    "Longitude": 98.335503,
+    "ความสูง (เมตร)": 22.3,
+    "เส้นรอบวง (เมตร)": 2.37,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 8415.3,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 6120.22
+  },
+  {
+    "รหัสต้นไม้": "03-044-003",
+    "ชื่อไทย": "กะอาม",
+    "Latitude": 7.877865,
+    "Longitude": 98.331592,
+    "ความสูง (เมตร)": 23.3,
+    "เส้นรอบวง (เมตร)": 2,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 6257.23,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 4550.71
+  },
+  {
+    "รหัสต้นไม้": "03-044-004",
+    "ชื่อไทย": "กะอาม",
+    "Latitude": 7.889888254,
+    "Longitude": 98.33255128,
+    "ความสูง (เมตร)": 12.7,
+    "เส้นรอบวง (เมตร)": 0.22,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 43.84,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 31.89
+  },
+  {
+    "รหัสต้นไม้": "03-045-001",
+    "ชื่อไทย": "ตีนนก",
+    "Latitude": 7.878676365,
+    "Longitude": 98.33189516,
+    "ความสูง (เมตร)": 10.2,
+    "เส้นรอบวง (เมตร)": 1.13,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 931.57,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 677.51
+  },
+  {
+    "รหัสต้นไม้": "03-045-002",
+    "ชื่อไทย": "ตีนนก",
+    "Latitude": 7.87733,
+    "Longitude": 98.32946,
+    "ความสูง (เมตร)": 13.1,
+    "เส้นรอบวง (เมตร)": 0.6,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 334.43,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 243.22
+  },
+  {
+    "รหัสต้นไม้": "03-046-001",
+    "ชื่อไทย": "นุ่น",
+    "Latitude": 7.892447907,
+    "Longitude": 98.33547816,
+    "ความสูง (เมตร)": 15.4,
+    "เส้นรอบวง (เมตร)": 2.3,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 5605.6,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 4076.8
+  },
+  {
+    "รหัสต้นไม้": "03-050-001",
+    "ชื่อไทย": "เหรียง",
+    "Latitude": 7.886292099,
+    "Longitude": 98.34009079,
+    "ความสูง (เมตร)": 19.2,
+    "เส้นรอบวง (เมตร)": 1.52,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 4189.83,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 3047.15
+  },
+  {
+    "รหัสต้นไม้": "03-050-002",
+    "ชื่อไทย": "เหรียง",
+    "Latitude": 7.885616,
+    "Longitude": 98.339949,
+    "ความสูง (เมตร)": 17.3,
+    "เส้นรอบวง (เมตร)": 1.9,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 5946.8,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 4324.95
+  },
+  {
+    "รหัสต้นไม้": "03-050-003",
+    "ชื่อไทย": "เหรียง",
+    "Latitude": 7.882052,
+    "Longitude": 98.337607,
+    "ความสูง (เมตร)": 17.2,
+    "เส้นรอบวง (เมตร)": 1.78,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 5196.2,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 3779.05
+  },
+  {
+    "รหัสต้นไม้": "03-050-004",
+    "ชื่อไทย": "เหรียง",
+    "Latitude": 7.883256,
+    "Longitude": 98.337491,
+    "ความสูง (เมตร)": 32,
+    "เส้นรอบวง (เมตร)": 1.9,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 10338.52,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 7518.92
+  },
+  {
+    "รหัสต้นไม้": "03-050-005",
+    "ชื่อไทย": "เหรียง",
+    "Latitude": 7.878056,
+    "Longitude": 98.331798,
+    "ความสูง (เมตร)": 26.3,
+    "เส้นรอบวง (เมตร)": 1.66,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 6622.4,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 4816.29
+  },
+  {
+    "รหัสต้นไม้": "04-017-001",
+    "ชื่อไทย": "ราชพฤกษ์",
+    "Latitude": 7.933740202,
+    "Longitude": 98.34903358,
+    "ความสูง (เมตร)": 8.01,
+    "เส้นรอบวง (เมตร)": 0.53,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 164.55,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 119.67
+  },
+  {
+    "รหัสต้นไม้": "04-017-002",
+    "ชื่อไทย": "ราชพฤกษ์",
+    "Latitude": 7.933808,
+    "Longitude": 98.348884,
+    "ความสูง (เมตร)": 11.06,
+    "เส้นรอบวง (เมตร)": 0.55,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 239.88,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 174.46
+  },
+  {
+    "รหัสต้นไม้": "04-017-003",
+    "ชื่อไทย": "ราชพฤกษ์",
+    "Latitude": 7.933712655,
+    "Longitude": 98.34877052,
+    "ความสูง (เมตร)": 7.81,
+    "เส้นรอบวง (เมตร)": 0.77,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 338.37,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 246.09
+  },
+  {
+    "รหัสต้นไม้": "04-019-001",
+    "ชื่อไทย": "กระถินณรงค์",
+    "Latitude": 7.935187514,
+    "Longitude": 98.34910389,
+    "ความสูง (เมตร)": 9.94,
+    "เส้นรอบวง (เมตร)": 0.8,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "04-021-001",
+    "ชื่อไทย": "ตีนเป็ด",
+    "Latitude": 7.935254,
+    "Longitude": 98.349033,
+    "ความสูง (เมตร)": 14.43,
+    "เส้นรอบวง (เมตร)": 1.98,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "04-021-002",
+    "ชื่อไทย": "ตีนเป็ด",
+    "Latitude": 7.93557625,
+    "Longitude": 98.34897626,
+    "ความสูง (เมตร)": 9.8,
+    "เส้นรอบวง (เมตร)": 1.9,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "04-021-003",
+    "ชื่อไทย": "ตีนเป็ด",
+    "Latitude": 7.935666,
+    "Longitude": 98.348946,
+    "ความสูง (เมตร)": 9.21,
+    "เส้นรอบวง (เมตร)": 0.76,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "04-024-001",
+    "ชื่อไทย": "มะม่วงหิมพานต์",
+    "Latitude": 7.933678781,
+    "Longitude": 98.34871502,
+    "ความสูง (เมตร)": 1.55,
+    "เส้นรอบวง (เมตร)": 0.1,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "04-030-001",
+    "ชื่อไทย": "พะยอม",
+    "Latitude": 7.933768706,
+    "Longitude": 98.34892304,
+    "ความสูง (เมตร)": 4.07,
+    "เส้นรอบวง (เมตร)": 0.21,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 13.69,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 9.95
+  },
+  {
+    "รหัสต้นไม้": "04-030-002",
+    "ชื่อไทย": "พะยอม",
+    "Latitude": 7.933983,
+    "Longitude": 98.350271,
+    "ความสูง (เมตร)": 7.29,
+    "เส้นรอบวง (เมตร)": 0.35,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 65.76,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 47.83
+  },
+  {
+    "รหัสต้นไม้": "04-031-001",
+    "ชื่อไทย": "อินทนิลน้ำ",
+    "Latitude": 7.935628576,
+    "Longitude": 98.34892915,
+    "ความสูง (เมตร)": 7.63,
+    "เส้นรอบวง (เมตร)": 0.41,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 94.16,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 68.48
+  },
+  {
+    "รหัสต้นไม้": "04-031-002",
+    "ชื่อไทย": "อินทนิลน้ำ",
+    "Latitude": 7.935537427,
+    "Longitude": 98.34895469,
+    "ความสูง (เมตร)": 8.18,
+    "เส้นรอบวง (เมตร)": 0.52,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 161.57,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 117.5
+  },
+  {
+    "รหัสต้นไม้": "04-031-003",
+    "ชื่อไทย": "อินทนิลน้ำ",
+    "Latitude": 7.935350154,
+    "Longitude": 98.34899476,
+    "ความสูง (เมตร)": 7.96,
+    "เส้นรอบวง (เมตร)": 0.57,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 189.14,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 137.55
+  },
+  {
+    "รหัสต้นไม้": "04-031-004",
+    "ชื่อไทย": "อินทนิลน้ำ",
+    "Latitude": 7.936235,
+    "Longitude": 98.348894,
+    "ความสูง (เมตร)": 5,
+    "เส้นรอบวง (เมตร)": 1.02,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 389.92,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 283.58
+  },
+  {
+    "รหัสต้นไม้": "04-032-001",
+    "ชื่อไทย": "พุดภูเก็ต",
+    "Latitude": 7.933726101,
+    "Longitude": 98.34952745,
+    "ความสูง (เมตร)": 4.06,
+    "เส้นรอบวง (เมตร)": 0.21,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": "ไม่ระบุ",
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": "ไม่ระบุ"
+  },
+  {
+    "รหัสต้นไม้": "04-033-001",
+    "ชื่อไทย": "ตีนเป็ดทะเล",
+    "Latitude": 7.93583,
+    "Longitude": 98.348835,
+    "ความสูง (เมตร)": 5.7,
+    "เส้นรอบวง (เมตร)": 0.48,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 142.19,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 103.41
+  },
+  {
+    "รหัสต้นไม้": "04-034-001",
+    "ชื่อไทย": "หูกระจง",
+    "Latitude": 7.935642,
+    "Longitude": 98.348907,
+    "ความสูง (เมตร)": 8.61,
+    "เส้นรอบวง (เมตร)": 0.41,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 105.49,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 76.72
+  },
+  {
+    "รหัสต้นไม้": "04-035-001",
+    "ชื่อไทย": "สนทะเล",
+    "Latitude": 7.935239,
+    "Longitude": 98.349102,
+    "ความสูง (เมตร)": 18.54,
+    "เส้นรอบวง (เมตร)": 0.49,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 309.5,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 225.09
+  },
+  {
+    "รหัสต้นไม้": "04-036-001",
+    "ชื่อไทย": "สัก",
+    "Latitude": 7.933925992,
+    "Longitude": 98.35027954,
+    "ความสูง (เมตร)": 6.66,
+    "เส้นรอบวง (เมตร)": 0.2,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 19.74,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 14.35
+  },
+  {
+    "รหัสต้นไม้": "04-037-001",
+    "ชื่อไทย": "ประดู่บ้าน",
+    "Latitude": 7.933936,
+    "Longitude": 98.350255,
+    "ความสูง (เมตร)": 6.94,
+    "เส้นรอบวง (เมตร)": 0.35,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 62.79,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 45.66
+  },
+  {
+    "รหัสต้นไม้": "04-037-002",
+    "ชื่อไทย": "ประดู่บ้าน",
+    "Latitude": 7.93375,
+    "Longitude": 98.34957,
+    "ความสูง (เมตร)": 7.28,
+    "เส้นรอบวง (เมตร)": 0.6,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 192.66,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 140.12
+  },
+  {
+    "รหัสต้นไม้": "04-037-003",
+    "ชื่อไทย": "ประดู่บ้าน",
+    "Latitude": 7.933578,
+    "Longitude": 98.350006,
+    "ความสูง (เมตร)": 7.53,
+    "เส้นรอบวง (เมตร)": 0.57,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 179.52,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 130.56
+  },
+  {
+    "รหัสต้นไม้": "04-037-004",
+    "ชื่อไทย": "ประดู่บ้าน",
+    "Latitude": 7.933384,
+    "Longitude": 98.350033,
+    "ความสูง (เมตร)": 8.11,
+    "เส้นรอบวง (เมตร)": 0.72,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 306.66,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 223.03
+  },
+  {
+    "รหัสต้นไม้": "04-038-001",
+    "ชื่อไทย": "โพธิ์",
+    "Latitude": 7.933833915,
+    "Longitude": 98.34982127,
+    "ความสูง (เมตร)": 15.8,
+    "เส้นรอบวง (เมตร)": 1.1,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1329.44,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 966.87
+  },
+  {
+    "รหัสต้นไม้": "04-048-001",
+    "ชื่อไทย": "มะขามป้อม",
+    "Latitude": 7.933878,
+    "Longitude": 98.350216,
+    "ความสูง (เมตร)": 20.08,
+    "เส้นรอบวง (เมตร)": 1.08,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 1603.78,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 1166.39
+  },
+  {
+    "รหัสต้นไม้": "04-049-001",
+    "ชื่อไทย": "ปีบ",
+    "Latitude": 7.933879619,
+    "Longitude": 98.35021608,
+    "ความสูง (เมตร)": 8.96,
+    "เส้นรอบวง (เมตร)": 1,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 647.33,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 470.79
+  },
+  {
+    "รหัสต้นไม้": "04-051-001",
+    "ชื่อไทย": "เสลา",
+    "Latitude": 7.936276469,
+    "Longitude": 98.34890012,
+    "ความสูง (เมตร)": 4.35,
+    "เส้นรอบวง (เมตร)": 0.33,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 35.97,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 26.16
+  },
+  {
+    "รหัสต้นไม้": "05-052-001",
+    "ชื่อไทย": "สมอพิเภก",
+    "Latitude": 7.899973083,
+    "Longitude": 98.34984373,
+    "ความสูง (เมตร)": 13.5,
+    "เส้นรอบวง (เมตร)": 3.5,
+    "ปริมาณการดูดซับคาร์บอนไดออกไซด์ (กิโลกรัมต่อไร่)": 11418.84,
+    "ปริมาณการปล่อยออกซิเจน (กิโลกรัมต่อไร่)": 8304.61
+  }
+];
+// เก็บข้อมูล Marker
+const markers = [];
+
+// เพิ่มจุด Marker จากข้อมูล TreeDB
+treeData.forEach(tree => {
+    if (tree.Latitude && tree.Longitude) {
+        const marker = L.marker([tree.Latitude, tree.Longitude]).addTo(map)
+            .bindPopup(`
+                <b>ชื่อ:</b> ${tree.ชื่อไทย}<br>
+                <b>ความสูง:</b> ${tree["ความสูง (เมตร)"]} เมตร<br>
+                <b>เส้นรอบวง:</b> ${tree["เส้นรอบวง (เมตร)"]} เมตร
+            `);
+        markers.push({ marker, name: tree.ชื่อไทย });
+    }
+});
+
+// ฟังก์ชันค้นหาต้นไม้
+function searchTree() {
+    const query = document.getElementById('search-input').value.trim();
+    if (!query) return;
+
+    const found = markers.find(item => item.name.includes(query));
+    if (found) {
+        map.setView(found.marker.getLatLng(), 14); // ซูมไปที่ตำแหน่ง Marker
+        found.marker.openPopup(); // เปิด Popup ของ Marker
+    } else {
+        alert('ไม่พบชื่อต้นไม้ที่ค้นหา');
+    }
+}
+</script>
 
 </body>
 </html>
